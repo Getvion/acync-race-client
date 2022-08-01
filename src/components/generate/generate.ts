@@ -1,6 +1,7 @@
-import { Controll } from '../controll/controll';
-import { Race } from '../race/race';
-import { CarTrack } from '../carTrack/carTrack';
+import { ICar } from '../../types';
+
+import { API, CarTrack, Control, Race } from '../index';
+
 export class Generate {
   generateApp() {
     const app = `
@@ -14,24 +15,69 @@ export class Generate {
     const body = document.querySelector('body') as HTMLBodyElement;
     body.innerHTML = `${app}`;
   }
-  generateGarage(controll: Controll, race: Race, carTrack: CarTrack) {
-    const field = document.createElement('div');
-    field.classList.add('fields');
-    (document.querySelector('.app') as HTMLElement).after(field);
-    const arr: string[] = controll.generateControll(race, carTrack);
-    field.innerHTML = `${arr.map((elem) => elem).join('')}`;
 
-    const main = document.createElement('main');
-    main.classList.add('garage');
-    (document.querySelector('.fields') as HTMLElement).after(main);
-    const trackList = document.createElement('div') as HTMLElement;
-    const h1 = document.createElement('h1');
-    h1.innerHTML = `Garage (?)`;
-    trackList.classList.add('trackList');
-    const page = document.createElement('h2');
-    page.innerHTML = `Page <span class="page__number">${1}</span>`;
-    main.append(h1);
-    h1.append(page);
-    main.append(trackList);
+  generateGarage(control: Control, race: Race, carTrack: CarTrack, api: API) {
+    control.generateControl(race, carTrack);
+    carTrack.generateTrackWrapper(api);
+  }
+
+  generateGarageListeners(carTrack: CarTrack, api: API) {
+    const trackList = document.querySelector('.trackList');
+
+    trackList?.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+
+      if (target.closest('.car-track') && target.tagName === 'BUTTON') {
+        if (!target.classList.contains('car__button-remove')) return;
+
+        const carId = target.parentElement?.nextElementSibling?.id;
+        carTrack.deleteCar(carId as string);
+        carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage'));
+
+        if (target.classList.contains('car__button-select')) {
+          const carId = target.parentElement?.nextElementSibling?.id;
+          const updateInput = document.querySelector('.field__update.update');
+          const updateButton = updateInput?.querySelector('button');
+          updateInput?.childNodes.forEach((elem) => {
+            (elem as HTMLInputElement).disabled = false;
+          });
+
+          const name = updateInput?.querySelector('.update__input[type=text]') as HTMLInputElement;
+          const color = updateInput?.querySelector('.update__input[type=color]') as HTMLInputElement;
+          const currentCar = api.getCar<ICar>('http://127.0.0.1:3000/garage', carId as string);
+
+          currentCar.then((result) => {
+            name.value = result.name;
+            color.value = result.color;
+          });
+
+          updateButton?.addEventListener('click', () => {
+            if (target.tagName === 'BUTTON') {
+              if (!(name.value && color.value)) return;
+
+              carTrack.updateCar(name.value, color.value, carId as string);
+              carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage'));
+
+              updateInput?.childNodes.forEach((elem) => ((elem as HTMLInputElement).disabled = true));
+
+              name.value = '';
+              color.value = '#000000';
+            }
+          });
+        }
+      }
+    });
+
+    const createInput = document.querySelector('.field__create.create');
+    createInput?.addEventListener('click', (event) => {
+      const target = event?.target as HTMLElement;
+      if (!(target.tagName === 'BUTTON')) return;
+
+      const name = (createInput.querySelector('.create__input[type=text]') as HTMLInputElement).value;
+      const color = (createInput.querySelector('.create__input[type=color]') as HTMLInputElement).value;
+
+      carTrack.createCar(name, color);
+      carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage'));
+    });
   }
 }

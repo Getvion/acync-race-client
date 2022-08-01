@@ -1,8 +1,13 @@
 import { Race } from '../race/race';
 import { CarTrack } from '../carTrack/carTrack';
 
-export class Controll {
-  generateControll(race: Race, carTrack: CarTrack): string[] {
-    return [carTrack.createInputs(), carTrack.updateInputs(), race.generateButtons()];
+export class Control {
+  generateControl(race: Race, carTrack: CarTrack) {
+    const field = document.createElement('div');
+    field.classList.add('fields');
+
+    (document.querySelector('.app') as HTMLElement).after(field);
+    const arr = [carTrack.createInputs(), carTrack.updateInputs(), race.generateButtons()];
+    field.innerHTML = `${arr.map((elem) => elem).join('')}`;
   }
 }

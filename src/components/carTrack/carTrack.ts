@@ -1,29 +1,53 @@
 import { ICar } from '../../types';
+import { API } from '../api/api';
+
 export class CarTrack {
-    createInputs() {
-        const block = `
+  createInputs() {
+    const block = `
         <div class="field__create create">
           <input class="create__input" type="text">
           <input class="create__input" type="color">
           <button>create</button>
         </div>
         `;
-        return block;
-    }
-    updateInputs() {
-        const block = `
+    return block;
+  }
+
+  updateInputs() {
+    const block = `
         <div class="field__update update">
-          <input class="update__input" type="text">
-          <input class="update__input" type="color">
-          <button>update</button>
+          <input class="update__input" type="text" disabled>
+          <input class="update__input" type="color" disabled>
+          <button disabled>update</button>
         </div>
         `;
-        return block;
-    }
+    return block;
+  }
 
-    markupTrack(data: ICar) {
-        const { name, color, id } = data;
-        const markup = `
+  generateTrackWrapper(api: API) {
+    const main = document.createElement('main');
+    main.classList.add('garage');
+    (document.querySelector('.fields') as HTMLElement).after(main);
+
+    const trackList = document.createElement('div') as HTMLElement;
+    trackList.classList.add('trackList');
+
+    const garageAmount = api.getAmountCars('http://127.0.0.1:3000/garage');
+
+    const h1 = document.createElement('h1');
+    h1.innerHTML = `Garage (${garageAmount})`;
+
+    const page = document.createElement('h2');
+    page.innerHTML = `Page <span class="page__number">${1}</span>`;
+
+    main.append(h1);
+    h1.append(page);
+    main.append(trackList);
+  }
+
+  markupTrack(data: ICar) {
+    const { name, color, id } = data;
+    const markup = `
             <div class="car-track">
             <h3 class="car__title">${name}</h3>
             <div class="car__buttons">
@@ -247,16 +271,37 @@ export class CarTrack {
             </div>
         </div>
         `;
-        return markup;
-    }
-    createTrack(cars: Promise<ICar[]>) {
-        const trackList = document.querySelector('.trackList') as HTMLElement;
-        cars.then((data) => {
-            const res = data.map((elem) => {
-                const track = this.markupTrack(elem);
-                return track;
-            });
-            trackList.innerHTML = res.join('');
-        });
-    }
+    return markup;
+  }
+
+  createTrack(cars: Promise<ICar[]>) {
+    const trackList = document.querySelector('.trackList') as HTMLElement;
+    cars.then((data) => {
+      const res = data.map((elem) => this.markupTrack(elem)).join('');
+
+      trackList.innerHTML = res;
+    });
+  }
+
+  deleteCar(id: string) {
+    fetch(`http://127.0.0.1:3000/garage/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  createCar(name: string, color: string) {
+    fetch(`http://127.0.0.1:3000/garage/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, color }),
+    });
+  }
+
+  updateCar(name: string, color: string, id: string) {
+    fetch(`http://127.0.0.1:3000/garage/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, color }),
+    });
+  }
 }
