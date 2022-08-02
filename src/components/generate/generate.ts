@@ -1,6 +1,6 @@
 import { ICar } from '../../types';
 
-import { API, CarTrack, Control, Race } from '../index';
+import { API, CarTrack, Control, Race, App } from '../index';
 
 export class Generate {
   generateApp() {
@@ -16,24 +16,21 @@ export class Generate {
     body.innerHTML = `${app}`;
   }
 
-  generateGarage(control: Control, race: Race, carTrack: CarTrack, api: API) {
+  generateGarage(control: Control, race: Race, carTrack: CarTrack, api: API, app: App) {
     control.generateControl(race, carTrack);
-    carTrack.generateTrackWrapper(api);
+    carTrack.generateTrackWrapper(api, app);
+    carTrack.paginationHandler(api, app);
   }
 
-  generateGarageListeners(carTrack: CarTrack, api: API) {
+  generateGarageListeners(carTrack: CarTrack, api: API, app: App) {
     const trackList = document.querySelector('.trackList');
-
     trackList?.addEventListener('click', (event) => {
       const target = event.target as HTMLElement;
-
       if (target.closest('.car-track') && target.tagName === 'BUTTON') {
-        if (!target.classList.contains('car__button-remove')) return;
-
-        const carId = target.parentElement?.nextElementSibling?.id;
-        carTrack.deleteCar(carId as string);
-        carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage'));
-
+        if (target.classList.contains('car__button-remove')) {
+          const carId = target.parentElement?.nextElementSibling?.id;
+          carTrack.deleteCar(carId as string);
+        }
         if (target.classList.contains('car__button-select')) {
           const carId = target.parentElement?.nextElementSibling?.id;
           const updateInput = document.querySelector('.field__update.update');
@@ -41,43 +38,48 @@ export class Generate {
           updateInput?.childNodes.forEach((elem) => {
             (elem as HTMLInputElement).disabled = false;
           });
-
           const name = updateInput?.querySelector('.update__input[type=text]') as HTMLInputElement;
           const color = updateInput?.querySelector('.update__input[type=color]') as HTMLInputElement;
           const currentCar = api.getCar<ICar>('http://127.0.0.1:3000/garage', carId as string);
-
           currentCar.then((result) => {
             name.value = result.name;
             color.value = result.color;
           });
-
           updateButton?.addEventListener('click', () => {
             if (target.tagName === 'BUTTON') {
-              if (!(name.value && color.value)) return;
-
-              carTrack.updateCar(name.value, color.value, carId as string);
-              carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage'));
-
-              updateInput?.childNodes.forEach((elem) => ((elem as HTMLInputElement).disabled = true));
-
-              name.value = '';
-              color.value = '#000000';
+              if (name.value && color.value) {
+                carTrack.updateCar(name.value, color.value, carId as string);
+                updateInput?.childNodes.forEach((elem) => {
+                  (elem as HTMLInputElement).disabled = true;
+                });
+                name.value = '';
+                color.value = '#000000';
+              }
             }
           });
         }
+        setTimeout(() => {
+          carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage', app.garagePage));
+          carTrack.updateGarageAmount(api);
+          carTrack.paginationClickableButtons(app, api);
+        }, 100);
       }
     });
-
     const createInput = document.querySelector('.field__create.create');
     createInput?.addEventListener('click', (event) => {
       const target = event?.target as HTMLElement;
-      if (!(target.tagName === 'BUTTON')) return;
-
-      const name = (createInput.querySelector('.create__input[type=text]') as HTMLInputElement).value;
-      const color = (createInput.querySelector('.create__input[type=color]') as HTMLInputElement).value;
-
-      carTrack.createCar(name, color);
-      carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage'));
+      if (target.tagName === 'BUTTON') {
+        const name = (createInput.querySelector('.create__input[type=text]') as HTMLInputElement).value;
+        const color = (createInput.querySelector('.create__input[type=color]') as HTMLInputElement).value;
+        if (name && color) {
+          carTrack.createCar(name, color);
+          carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage', app.garagePage));
+          carTrack.updateGarageAmount(api);
+          carTrack.paginationClickableButtons(app, api);
+        }
+        (createInput.querySelector('.create__input[type=text]') as HTMLInputElement).value = '';
+        (createInput.querySelector('.create__input[type=color]') as HTMLInputElement).value = '#000000';
+      }
     });
   }
 }
