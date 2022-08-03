@@ -11,5 +11,5 @@ const api = new API();
 generate.generateApp();
 generate.generateGarage(control, race, carTrack, api, app);
 generate.generateGarageListeners(carTrack, api, app);
-race.generateRaceListeners(carTrack, api);
-carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage', app.garagePage));
+race.generateRaceListeners(carTrack, api, app);
+carTrack.createTrack(api.getCars<ICar[]>(app.garagePage));

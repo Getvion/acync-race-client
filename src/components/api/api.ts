@@ -1,8 +1,8 @@
 export class API {
   BASE_URL = 'http://127.0.0.1:3000';
 
-  async getCars<Type>(url: string, page: number, limit = 7): Promise<Type> {
-    const response = await fetch(`${url}?_page=${page}&_limit=${limit}`);
+  async getCars<Type>(page: number, limit = 7): Promise<Type> {
+    const response = await fetch(`${this.BASE_URL}/garage?_page=${page}&_limit=${limit}`);
     return await response.json();
   }
 

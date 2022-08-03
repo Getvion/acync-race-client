@@ -29,11 +29,10 @@ export class CarTrack {
     (document.querySelector('.fields') as HTMLElement).after(main);
     const trackList = document.createElement('div') as HTMLElement;
     const h1 = document.createElement('h1');
-    const getGarageAmount = async () => {
+    (async () => {
       const garageAmount = await api.getAmountCars('http://127.0.0.1:3000/garage');
       h1.innerHTML = `Garage (${garageAmount})`;
-    };
-    getGarageAmount();
+    })();
     trackList.classList.add('trackList');
     const page = document.createElement('h2');
     page.innerHTML = `Page <span class="page__number">${app.garagePage}</span>`;
@@ -48,10 +47,12 @@ export class CarTrack {
 
   paginationHandler(api: API, app: App) {
     const pagination = document.querySelector('.pagination');
+
     pagination?.addEventListener('click', (event) => {
       const btnPrev = document.querySelector('.pagination__prev') as HTMLButtonElement;
       const btnNext = document.querySelector('.pagination__next') as HTMLButtonElement;
       const target = event.target as HTMLElement;
+
       if (target.tagName === 'BUTTON') {
         if (target.className === 'pagination__prev') {
           if (btnPrev.disabled) {
@@ -60,6 +61,7 @@ export class CarTrack {
             app.garagePage -= 1;
           }
         }
+
         if (target.className === 'pagination__next') {
           if (btnNext.disabled) {
             alert('how you click disabled button??');
@@ -67,8 +69,11 @@ export class CarTrack {
             app.garagePage += 1;
           }
         }
-        this.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage', app.garagePage));
+
+        this.createTrack(api.getCars<ICar[]>(app.garagePage));
+        setTimeout(() => this.carHandler(api), 100);
       }
+
       this.paginationClickableButtons(app, api);
       this.updatePageNumber(app);
     });
@@ -82,11 +87,13 @@ export class CarTrack {
   paginationClickableButtons(app: App, api: API) {
     const btnPrev = document.querySelector('.pagination__prev') as HTMLButtonElement;
     const btnNext = document.querySelector('.pagination__next') as HTMLButtonElement;
+
     if (app.garagePage === 1) {
       btnPrev.disabled = true;
     } else {
       btnPrev.disabled = false;
     }
+
     (async () => {
       const amount = await api.getAmountCars('http://127.0.0.1:3000/garage');
       const pages = Math.ceil(amount / app.tracksOnPage);
@@ -97,8 +104,9 @@ export class CarTrack {
       }
       if (pages < app.garagePage) {
         app.garagePage -= 1;
-        this.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage', app.garagePage));
+        this.createTrack(api.getCars<ICar[]>(app.garagePage));
         this.updatePageNumber(app);
+        setTimeout(() => this.carHandler(api), 100);
       }
     })();
   }
@@ -113,7 +121,7 @@ export class CarTrack {
 
   markupTrack(data: ICar) {
     const { name, color, id } = data;
-    const markup = `
+    return `
           <div class="car-track">
           <h3 class="car__title">${name}</h3>
           <div class="car__buttons">
@@ -339,17 +347,13 @@ export class CarTrack {
           </div>
       </div>
       `;
-    return markup;
   }
 
   createTrack(cars: Promise<ICar[]>) {
     const trackList = document.querySelector('.trackList') as HTMLElement;
     cars.then((data) => {
-      const res = data.map((elem) => {
-        const track = this.markupTrack(elem);
-        return track;
-      });
-      trackList.innerHTML = res.join('');
+      const res = data.map((elem) => this.markupTrack(elem)).join('');
+      trackList.innerHTML = res;
     });
   }
 
@@ -379,14 +383,15 @@ export class CarTrack {
     });
   }
 
-  drive(time: string, id: string) {
-    const car = document.getElementById(String(id)) as HTMLElement;
-    car.style.cssText = `animation-duration: ${time}s;`;
-    car?.classList.add('drive');
-  }
+  // drive(time: string, id: string) {
+  //   const car = document.getElementById(id) as HTMLElement;
+  //   car.style.cssText = `animation-duration: ${time}s;`;
+  //   car?.classList.add('drive');
+  // }
 
   carHandler(api: API) {
     const carTracks = document.querySelectorAll('.car-track') as NodeList;
+
     carTracks.forEach((element) => {
       element.addEventListener('click', async (event) => {
         const target = event.target as HTMLButtonElement;
@@ -395,16 +400,11 @@ export class CarTrack {
 
         const btnStart = target.closest('.car-track')?.querySelector('.button-start') as HTMLButtonElement;
         const btnStop = target.closest('.car-track')?.querySelector('.button-stop') as HTMLButtonElement;
-        if (target.tagName === 'BUTTON' && target.className === 'button-start') {
-          btnStart.disabled = true;
-          const { velocity, distance } = await api.startEngine(id);
-          const time = (distance / velocity / 1000).toFixed(1) as string;
-          car?.classList.add('drive');
-          car.style.cssText = `animation-duration: ${time}s;`;
-          this.engineOperation(id, car, api);
-          btnStop.disabled = false;
+
+        if (target.className === 'button-start') {
+          this.engineOperation(id, car, api, btnStart, btnStop);
         }
-        if (target.tagName === 'BUTTON' && target.className === 'button-stop') {
+        if (target.className === 'button-stop') {
           btnStop.disabled = true;
           car?.classList.remove('drive');
           btnStart.disabled = false;
@@ -413,15 +413,25 @@ export class CarTrack {
     });
   }
 
-  async engineOperation(id: string, car: HTMLElement, api: API) {
+  async engineOperation(
+    id: string,
+    car: HTMLElement,
+    api: API,
+    btnStart: HTMLButtonElement,
+    btnStop: HTMLButtonElement
+  ) {
+    btnStart.disabled = true;
+    const { velocity, distance } = await api.startEngine(id);
+    const time = (distance / velocity / 1000).toFixed(1) as string;
+    car?.classList.add('drive');
+    car.style.cssText = `animation-duration: ${time}s;`;
+    btnStop.disabled = false;
+
     try {
-      const result = await api.startDrive(id);
-      console.log(result, 'внутри трая');
+      await api.startDrive(id);
     } catch (error) {
-      console.log(error, 'ошибка в условии');
       car.style.animationPlayState = 'paused';
-      const stopEngine = await api.stopEngine(id);
-      console.log(stopEngine, 'не доехала, отправили на сервак стоп движка');
+      await api.stopEngine(id);
     }
   }
 }

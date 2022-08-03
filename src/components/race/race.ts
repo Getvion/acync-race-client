@@ -1,5 +1,6 @@
 import { ICar } from '../../types';
 import { API } from '../api/api';
+import { App } from '../app/app';
 import { CarTrack } from '../carTrack/carTrack';
 
 export class Race {
@@ -43,13 +44,15 @@ export class Race {
     }
   }
 
-  generateRaceListeners(carTrack: CarTrack, api: API) {
+  generateRaceListeners(carTrack: CarTrack, api: API, app: App) {
     const generateCarsButton = document.querySelector('.fields__button-generate');
+
     generateCarsButton?.addEventListener('click', () => {
       this.generateCars(carTrack);
-      carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage', 1));
+      carTrack.createTrack(api.getCars<ICar[]>(1));
       carTrack.updateGarageAmount(api);
-      setTimeout(() => carTrack.carHandler(api), 100);
+      setTimeout(() => carTrack.carHandler(api), 300);
+      carTrack.paginationClickableButtons(app, api);
     });
   }
 }

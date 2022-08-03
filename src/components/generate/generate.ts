@@ -19,12 +19,12 @@ export class Generate {
     control.generateControl(race, carTrack);
     carTrack.generateTrackWrapper(api, app);
     carTrack.paginationHandler(api, app);
+    carTrack.paginationClickableButtons(app, api);
     setTimeout(() => carTrack.carHandler(api), 100);
   }
 
   generateGarageListeners(carTrack: CarTrack, api: API, app: App) {
     const trackList = document.querySelector('.trackList');
-
     trackList?.addEventListener('click', (event) => {
       const target = event.target as HTMLElement;
 
@@ -61,13 +61,17 @@ export class Generate {
                 });
                 name.value = '';
                 color.value = '#000000';
+
+                carTrack.createTrack(api.getCars<ICar[]>(app.garagePage));
+                setTimeout(() => carTrack.carHandler(api), 100);
               }
             }
           });
         }
 
         setTimeout(() => {
-          carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage', app.garagePage));
+          carTrack.createTrack(api.getCars<ICar[]>(app.garagePage));
+          setTimeout(() => carTrack.carHandler(api), 100);
           carTrack.updateGarageAmount(api);
           carTrack.paginationClickableButtons(app, api);
         }, 100);
@@ -75,7 +79,6 @@ export class Generate {
     });
 
     const createInput = document.querySelector('.field__create.create');
-
     createInput?.addEventListener('click', (event) => {
       const target = event?.target as HTMLElement;
       if (target.tagName === 'BUTTON') {
@@ -83,13 +86,43 @@ export class Generate {
         const color = (createInput.querySelector('.create__input[type=color]') as HTMLInputElement).value;
         if (name && color) {
           carTrack.createCar(name, color);
-          carTrack.createTrack(api.getCars<ICar[]>('http://127.0.0.1:3000/garage', app.garagePage));
+          carTrack.createTrack(api.getCars<ICar[]>(app.garagePage));
+          setTimeout(() => carTrack.carHandler(api), 100);
           carTrack.updateGarageAmount(api);
           carTrack.paginationClickableButtons(app, api);
         }
         (createInput.querySelector('.create__input[type=text]') as HTMLInputElement).value = '';
         (createInput.querySelector('.create__input[type=color]') as HTMLInputElement).value = '#000000';
       }
+    });
+
+    const startRaceBtn = document.querySelector('.fields__button-start');
+    startRaceBtn?.addEventListener('click', () => {
+      const allCarsOnPage = document.querySelectorAll('.car') as NodeList;
+      allCarsOnPage.forEach((car) => {
+        const carElem = car as HTMLElement;
+        const id = carElem.id;
+
+        const btnStart = carElem.closest('.car-track')?.querySelector('.button-start') as HTMLButtonElement;
+        const btnStop = carElem.closest('.car-track')?.querySelector('.button-stop') as HTMLButtonElement;
+
+        carTrack.engineOperation(id, car as HTMLElement, api, btnStart, btnStop);
+      });
+    });
+
+    const stopRaceBtn = document.querySelector('.fields__button-reset');
+    stopRaceBtn?.addEventListener('click', () => {
+      const allCarsOnPage = document.querySelectorAll('.car') as NodeList;
+      allCarsOnPage.forEach((car) => {
+        const carElem = car as HTMLElement;
+
+        const btnStart = carElem.closest('.car-track')?.querySelector('.button-start') as HTMLButtonElement;
+        const btnStop = carElem.closest('.car-track')?.querySelector('.button-stop') as HTMLButtonElement;
+
+        btnStop.disabled = true;
+        carElem?.classList.remove('drive');
+        btnStart.disabled = false;
+      });
     });
   }
 }
