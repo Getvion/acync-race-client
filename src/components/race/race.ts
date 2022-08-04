@@ -49,7 +49,7 @@ export class Race {
 
     generateCarsButton?.addEventListener('click', () => {
       this.generateCars(carTrack);
-      carTrack.createTrack(api.getCars<ICar[]>(1));
+      carTrack.createTrack(api.getCars(1));
       carTrack.updateGarageAmount(api);
       setTimeout(() => carTrack.carHandler(api), 300);
       carTrack.paginationClickableButtons(app, api);

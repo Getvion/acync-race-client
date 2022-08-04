@@ -30,7 +30,7 @@ export class CarTrack {
     const trackList = document.createElement('div') as HTMLElement;
     const h1 = document.createElement('h1');
     (async () => {
-      const garageAmount = await api.getAmountCars('http://127.0.0.1:3000/garage');
+      const garageAmount = await api.getAmountCars();
       h1.innerHTML = `Garage (${garageAmount})`;
     })();
     trackList.classList.add('trackList');
@@ -70,7 +70,7 @@ export class CarTrack {
           }
         }
 
-        this.createTrack(api.getCars<ICar[]>(app.garagePage));
+        this.createTrack(api.getCars(app.garagePage));
         setTimeout(() => this.carHandler(api), 100);
       }
 
@@ -95,7 +95,7 @@ export class CarTrack {
     }
 
     (async () => {
-      const amount = await api.getAmountCars('http://127.0.0.1:3000/garage');
+      const amount = await api.getAmountCars();
       const pages = Math.ceil(amount / app.tracksOnPage);
       if (pages > app.garagePage) {
         btnNext.disabled = false;
@@ -104,7 +104,7 @@ export class CarTrack {
       }
       if (pages < app.garagePage) {
         app.garagePage -= 1;
-        this.createTrack(api.getCars<ICar[]>(app.garagePage));
+        this.createTrack(api.getCars(app.garagePage));
         this.updatePageNumber(app);
         setTimeout(() => this.carHandler(api), 100);
       }
@@ -114,7 +114,7 @@ export class CarTrack {
   updateGarageAmount(api: API) {
     const h1 = document.querySelector('h1') as HTMLElement;
     (async () => {
-      const garageAmount = await api.getAmountCars('http://127.0.0.1:3000/garage');
+      const garageAmount = await api.getAmountCars();
       h1.innerHTML = `Garage (${garageAmount})`;
     })();
   }
@@ -366,9 +366,7 @@ export class CarTrack {
   createCar(name: string, color: string) {
     fetch(`http://127.0.0.1:3000/garage/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, color }),
     });
   }
@@ -376,9 +374,7 @@ export class CarTrack {
   updateCar(name: string, color: string, id: string) {
     fetch(`http://127.0.0.1:3000/garage/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, color }),
     });
   }

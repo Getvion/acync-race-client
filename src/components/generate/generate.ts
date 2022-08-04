@@ -45,7 +45,7 @@ export class Generate {
 
           const name = updateInput?.querySelector('.update__input[type=text]') as HTMLInputElement;
           const color = updateInput?.querySelector('.update__input[type=color]') as HTMLInputElement;
-          const currentCar = api.getCar<ICar>('http://127.0.0.1:3000/garage', carId as string);
+          const currentCar = api.getCar(carId as string);
 
           currentCar.then((result) => {
             name.value = result.name;
@@ -62,7 +62,7 @@ export class Generate {
                 name.value = '';
                 color.value = '#000000';
 
-                carTrack.createTrack(api.getCars<ICar[]>(app.garagePage));
+                carTrack.createTrack(api.getCars(app.garagePage));
                 setTimeout(() => carTrack.carHandler(api), 100);
               }
             }
@@ -70,7 +70,7 @@ export class Generate {
         }
 
         setTimeout(() => {
-          carTrack.createTrack(api.getCars<ICar[]>(app.garagePage));
+          carTrack.createTrack(api.getCars(app.garagePage));
           setTimeout(() => carTrack.carHandler(api), 100);
           carTrack.updateGarageAmount(api);
           carTrack.paginationClickableButtons(app, api);
@@ -86,7 +86,7 @@ export class Generate {
         const color = (createInput.querySelector('.create__input[type=color]') as HTMLInputElement).value;
         if (name && color) {
           carTrack.createCar(name, color);
-          carTrack.createTrack(api.getCars<ICar[]>(app.garagePage));
+          carTrack.createTrack(api.getCars(app.garagePage));
           setTimeout(() => carTrack.carHandler(api), 100);
           carTrack.updateGarageAmount(api);
           carTrack.paginationClickableButtons(app, api);
@@ -160,7 +160,7 @@ export class Generate {
         carElem?.classList.remove('drive');
         btnStart.disabled = false;
       });
-      carTrack.createTrack(api.getCars<ICar[]>(app.garagePage));
+      carTrack.createTrack(api.getCars(app.garagePage));
     });
   }
 }
