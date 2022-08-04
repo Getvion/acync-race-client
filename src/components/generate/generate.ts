@@ -96,9 +96,14 @@ export class Generate {
       }
     });
 
-    const startRaceBtn = document.querySelector('.fields__button-start');
-    startRaceBtn?.addEventListener('click', () => {
+    const startRaceBtn = document.querySelector('.fields__button-start') as HTMLButtonElement;
+    startRaceBtn.addEventListener('click', () => {
+      const arrOfWinners: { id: string; success: boolean; time: string }[] = [];
+      let finished = false;
       const allCarsOnPage = document.querySelectorAll('.car') as NodeList;
+      startRaceBtn.disabled = true;
+      stopRaceBtn.disabled = false;
+
       allCarsOnPage.forEach((car) => {
         const carElem = car as HTMLElement;
         const id = carElem.id;
@@ -106,12 +111,44 @@ export class Generate {
         const btnStart = carElem.closest('.car-track')?.querySelector('.button-start') as HTMLButtonElement;
         const btnStop = carElem.closest('.car-track')?.querySelector('.button-stop') as HTMLButtonElement;
 
-        carTrack.engineOperation(id, car as HTMLElement, api, btnStart, btnStop);
+        (async () => {
+          const carData = await carTrack.engineOperation(id, car as HTMLElement, api, btnStart, btnStop);
+          if (!carData) return;
+          arrOfWinners.push(carData);
+
+          if (arrOfWinners.length && !finished) {
+            const winner = arrOfWinners[0];
+            finished = true;
+
+            const winnerObj = await api.getWinner(winner.id);
+
+            if (Number(winnerObj.id)) {
+              const bestTime = winner.time < winnerObj.time ? winner.time : winnerObj.time;
+
+              const newWinnerData = {
+                wins: ++winnerObj.wins,
+                time: Number(bestTime),
+              };
+
+              api.updateWinner(id, newWinnerData);
+            } else {
+              const newWinner = {
+                id: Number(winner.id),
+                time: Number(winner.time),
+                wins: 1,
+              };
+              api.createWinner(newWinner);
+            }
+          }
+        })();
       });
     });
 
-    const stopRaceBtn = document.querySelector('.fields__button-reset');
-    stopRaceBtn?.addEventListener('click', () => {
+    const stopRaceBtn = document.querySelector('.fields__button-reset') as HTMLButtonElement;
+    stopRaceBtn.addEventListener('click', () => {
+      startRaceBtn.disabled = false;
+      stopRaceBtn.disabled = true;
+
       const allCarsOnPage = document.querySelectorAll('.car') as NodeList;
       allCarsOnPage.forEach((car) => {
         const carElem = car as HTMLElement;
@@ -123,6 +160,7 @@ export class Generate {
         carElem?.classList.remove('drive');
         btnStart.disabled = false;
       });
+      carTrack.createTrack(api.getCars<ICar[]>(app.garagePage));
     });
   }
 }

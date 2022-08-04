@@ -18,21 +18,44 @@ export class API {
   }
 
   async startEngine(id: string) {
-    const data = await fetch(`${this.BASE_URL}/engine?id=${id}&status=started`, {
-      method: 'PATCH',
-    });
+    const data = await fetch(`${this.BASE_URL}/engine?id=${id}&status=started`, { method: 'PATCH' });
     return data.json();
   }
 
   async stopEngine(id: string) {
-    return await fetch(`${this.BASE_URL}/engine?id=${id}&status=stopped`, {
-      method: 'PATCH',
-    }).then((data) => data.json());
+    const data = await fetch(`${this.BASE_URL}/engine?id=${id}&status=stopped`, { method: 'PATCH' });
+    return data.json();
   }
 
   async startDrive(id: string) {
-    return await fetch(`${this.BASE_URL}/engine?id=${id}&status=drive`, {
-      method: 'PATCH',
+    return await fetch(`${this.BASE_URL}/engine?id=${id}&status=drive`, { method: 'PATCH' }).then((data) =>
+      data.json()
+    );
+  }
+
+  async getWinner(id: string) {
+    return await fetch(`${this.BASE_URL}/winners/${id}`).then((data) => data.json());
+  }
+
+  async updateWinner(id: string, winnerObj: { wins: number; time: number }) {
+    return await fetch(`${this.BASE_URL}/winners/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(winnerObj),
     }).then((data) => data.json());
+  }
+
+  async createWinner(winnerObj: { id: number; wins: number; time: number }) {
+    return await fetch(`${this.BASE_URL}/winners`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(winnerObj),
+    }).then((data) => data.json());
+  }
+
+  async getWinners(page: number = 1, limit: number = 10, sort: string = 'id', order: string = 'ASC') {
+    return fetch(`${this.BASE_URL}/winners?_page=${page}&_limit=${limit}&_sort=${sort}&_order=${order}`).then((data) =>
+      data.json()
+    );
   }
 }

@@ -383,12 +383,6 @@ export class CarTrack {
     });
   }
 
-  // drive(time: string, id: string) {
-  //   const car = document.getElementById(id) as HTMLElement;
-  //   car.style.cssText = `animation-duration: ${time}s;`;
-  //   car?.classList.add('drive');
-  // }
-
   carHandler(api: API) {
     const carTracks = document.querySelectorAll('.car-track') as NodeList;
 
@@ -422,16 +416,20 @@ export class CarTrack {
   ) {
     btnStart.disabled = true;
     const { velocity, distance } = await api.startEngine(id);
-    const time = (distance / velocity / 1000).toFixed(1) as string;
+    const time = (distance / velocity / 1000).toFixed(1);
     car?.classList.add('drive');
     car.style.cssText = `animation-duration: ${time}s;`;
     btnStop.disabled = false;
 
     try {
-      await api.startDrive(id);
+      const { success } = await api.startDrive(id);
+      return { time, success, id };
     } catch (error) {
-      car.style.animationPlayState = 'paused';
-      await api.stopEngine(id);
+      if (error instanceof Error) {
+        car.style.animationPlayState = 'paused';
+        await api.stopEngine(id);
+        // console.log(error.message);
+      }
     }
   }
 }
