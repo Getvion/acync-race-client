@@ -1,4 +1,3 @@
-import { ICar } from '../../types';
 import { API } from '../api/api';
 import { App } from '../app/app';
 import { CarTrack } from '../carTrack/carTrack';
