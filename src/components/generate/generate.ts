@@ -34,45 +34,14 @@ export class Generate {
   trackListListener(event: Event, carTrack: CarTrack, api: API, app: App) {
     const target = event.target as HTMLElement;
 
-    if (target.closest('.car-track') && target.tagName === 'BUTTON' && target.classList.contains('car__button')) {
+    if (target.closest('.car-track') && target.classList.contains('car__button')) {
       if (target.classList.contains('car__button-remove')) {
         const carId = target.parentElement?.nextElementSibling?.id;
         carTrack.deleteCar(carId as string);
       }
 
       if (target.classList.contains('car__button-select')) {
-        const carId = target.parentElement?.nextElementSibling?.id;
-        const updateInput = document.querySelector('.field__update.update');
-        const updateButton = updateInput?.querySelector('button');
-
-        updateInput?.childNodes.forEach((elem) => {
-          (elem as HTMLInputElement).disabled = false;
-        });
-
-        const name = updateInput?.querySelector('.update__input[type=text]') as HTMLInputElement;
-        const color = updateInput?.querySelector('.update__input[type=color]') as HTMLInputElement;
-        const currentCar = api.getCar(carId as string);
-
-        currentCar.then((result) => {
-          name.value = result.name;
-          color.value = result.color;
-        });
-
-        updateButton?.addEventListener('click', () => {
-          if (target.tagName === 'BUTTON') {
-            if (name.value && color.value) {
-              carTrack.updateCar(name.value, color.value, carId as string);
-              updateInput?.childNodes.forEach((elem) => {
-                (elem as HTMLInputElement).disabled = true;
-              });
-              name.value = '';
-              color.value = '#000000';
-
-              carTrack.createTrack(api.getCars(app.garagePage));
-              setTimeout(() => carTrack.carHandler(api), 100);
-            }
-          }
-        });
+        this.selectButton(target, api, carTrack, app);
       }
 
       setTimeout(() => {
@@ -82,6 +51,34 @@ export class Generate {
         carTrack.paginationClickableButtons(app, api);
       }, 100);
     }
+  }
+
+  selectButton(target: HTMLElement, api: API, carTrack: CarTrack, app: App) {
+    const carId = target.parentElement?.nextElementSibling?.id;
+    const updateInput = document.querySelector('.field__update.update');
+    const updateButton = updateInput?.querySelector('button');
+    const name = updateInput?.querySelector('.update__input[type=text]') as HTMLInputElement;
+    const color = updateInput?.querySelector('.update__input[type=color]') as HTMLInputElement;
+    const currentCar = api.getCar(carId as string);
+
+    updateInput?.childNodes.forEach((elem) => ((elem as HTMLInputElement).disabled = false));
+
+    currentCar.then((result) => {
+      name.value = result.name;
+      color.value = result.color;
+    });
+
+    updateButton?.addEventListener('click', () => {
+      if (!(name.value && color.value)) return;
+
+      carTrack.updateCar(name.value, color.value, carId as string);
+      updateInput?.childNodes.forEach((elem) => ((elem as HTMLInputElement).disabled = true));
+      name.value = '';
+      color.value = '#000000';
+
+      carTrack.createTrack(api.getCars(app.garagePage));
+      setTimeout(() => carTrack.carHandler(api), 100);
+    });
   }
 
   createInputListener(event: Event, carTrack: CarTrack, api: API, app: App, createInput: Element) {
@@ -111,12 +108,11 @@ export class Generate {
     allCarsOnPage.forEach((car) => {
       const carElem = car as HTMLElement;
       const id = carElem.id;
-
       const btnStart = carElem.closest('.car-track')?.querySelector('.button-start') as HTMLButtonElement;
       const btnStop = carElem.closest('.car-track')?.querySelector('.button-stop') as HTMLButtonElement;
 
       (async () => {
-        const carData = await carTrack.engineOperation(id, car as HTMLElement, api, btnStart, btnStop);
+        const carData = await carTrack.engineOperation(id, carElem, api, btnStart, btnStop);
         if (!carData) return;
         arrOfWinners.push(carData);
 
@@ -126,22 +122,11 @@ export class Generate {
 
           const winnerObj = await api.getWinner(winner.id);
 
-          if (Number(winnerObj.id)) {
-            const bestTime = winner.time < winnerObj.time ? winner.time : winnerObj.time;
-
-            const newWinnerData = {
-              wins: ++winnerObj.wins,
-              time: Number(bestTime),
-            };
-
-            api.updateWinner(id, newWinnerData);
+          if (winnerObj.id) {
+            const bestTime = Number(winner.time < winnerObj.time ? winner.time : winnerObj.time);
+            api.updateWinner(id, { wins: ++winnerObj.wins, time: bestTime });
           } else {
-            const newWinner = {
-              id: Number(winner.id),
-              time: Number(winner.time),
-              wins: 1,
-            };
-            api.createWinner(newWinner);
+            api.createWinner({ id: Number(winner.id), time: Number(winner.time), wins: 1 });
           }
         }
       })();
@@ -169,14 +154,10 @@ export class Generate {
   async generateWinners(winners: Winners, api: API) {
     const arrOfWinnersWithCars = await api.getWinnersWithCars();
 
-    console.log(arrOfWinnersWithCars);
-
     const app = document.querySelector('.app') as HTMLElement;
-    app.innerHTML = winners.createTabel(arrOfWinnersWithCars);
+    app.innerHTML = winners.createTable();
 
     const tableBody = document.querySelector('.table__body');
-    setTimeout(() => {
-      arrOfWinnersWithCars.forEach((elem, i) => tableBody?.append(winners.createTr(elem, i)));
-    }, 100);
+    setTimeout(() => arrOfWinnersWithCars.forEach((elem, i) => tableBody?.append(winners.createTr(elem, i))), 100);
   }
 }

@@ -3,8 +3,8 @@ import { IWinnerWithCars } from '../../types';
 import './table.scss';
 
 export class Winners {
-  createTabel(arrOfRows: IWinnerWithCars[]) {
-    const tableLayout = `
+  createTable() {
+    return `
     <table class="table">
       <tbody class="table__body">
         <tr class=" table__header table__row">
@@ -16,8 +16,6 @@ export class Winners {
         </tr>     
       </tbody>
     </table>`;
-
-    return tableLayout;
   }
 
   createRow(obj: IWinnerWithCars, index: number) {

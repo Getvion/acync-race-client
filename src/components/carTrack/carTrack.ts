@@ -393,11 +393,9 @@ export class CarTrack {
       const { success } = await api.switchEngineState(id, 'drive');
       return { time, success, id };
     } catch (error) {
-      if (error instanceof Error) {
-        car.style.animationPlayState = 'paused';
-        await api.switchEngineState(id, 'drive');
-        // console.log(error.message);
-      }
+      if (!(error instanceof Error)) return;
+      car.style.animationPlayState = 'paused';
+      await api.switchEngineState(id, 'stopped');
     }
   }
 }
