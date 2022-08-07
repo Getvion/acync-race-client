@@ -35,9 +35,12 @@ garageBtn.click();
 winnerBtn.addEventListener('click', () => {
   garageBtn.disabled = false;
   winnerBtn.disabled = true;
-
   const appElement = document.querySelector('.app') as HTMLElement;
   appElement.innerHTML = '';
-
-  generate.generateWinners(winners, api);
+  generate.generatePageWinners(api, app);
+  generate.generateWinners(winners, api, app);
+  const appContainer = document.querySelector('.app') as HTMLElement;
+  appContainer.innerHTML = winners.createTable();
+  winners.isClickablePagination(app, api);
+  generate.generateWinnersListeners(winners, api, app, carTrack);
 });

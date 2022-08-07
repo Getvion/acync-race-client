@@ -49,7 +49,12 @@ export class API {
     return data.json();
   }
 
-  async getWinners(page: number = 1, limit: number = 10, sort: string = 'id', order: 'ASC' | 'DESC' = 'ASC') {
+  async getWinnersAmount() {
+    const response = await fetch(`${this.BASE_URL}/winners`);
+    return (await Promise.resolve(response.json())).length;
+  }
+
+  async getWinners(page: number = 1, limit: number = 10, sort: string = 'id', order: string = 'ASC') {
     const data = await fetch(`${this.BASE_URL}/winners?_page=${page}&_limit=${limit}&_sort=${sort}&_order=${order}`);
     return data.json();
   }

@@ -21,11 +21,11 @@ export class Generate {
     });
 
     const startRaceBtn = document.querySelector('.fields__button-start') as HTMLButtonElement;
+    const stopRaceBtn = document.querySelector('.fields__button-reset') as HTMLButtonElement;
+
     startRaceBtn.addEventListener('click', () => {
       this.startRaceBtnListener(carTrack, api, startRaceBtn, stopRaceBtn);
     });
-
-    const stopRaceBtn = document.querySelector('.fields__button-reset') as HTMLButtonElement;
     stopRaceBtn.addEventListener('click', () => {
       this.stopRaceBtnListener(carTrack, api, app, startRaceBtn, stopRaceBtn);
     });
@@ -124,7 +124,13 @@ export class Generate {
 
           if (winnerObj.id) {
             const bestTime = Number(winner.time < winnerObj.time ? winner.time : winnerObj.time);
-            api.updateWinner(id, { wins: ++winnerObj.wins, time: bestTime });
+
+            const newWinnerData = {
+              wins: ++winnerObj.wins,
+              time: bestTime,
+            };
+
+            api.updateWinner(id, newWinnerData);
           } else {
             api.createWinner({ id: Number(winner.id), time: Number(winner.time), wins: 1 });
           }
@@ -151,13 +157,38 @@ export class Generate {
     carTrack.createTrack(api.getCars(app.garagePage));
   }
 
-  async generateWinners(winners: Winners, api: API) {
-    const arrOfWinnersWithCars = await api.getWinnersWithCars();
+  generatePageWinners(api: API, app: App) {
+    const appContainer = document.querySelector('.app') as HTMLElement;
+    const h1 = document.createElement('h1');
+    (async () => {
+      const winnersAmount = await api.getWinnersAmount();
+      h1.innerHTML = `Winners (${winnersAmount})`;
+      const h2 = document.createElement('h2');
+      h2.innerHTML = `Page <span class="page__number">${app.winnersPage}</span>`;
+      appContainer.prepend(h2, h1);
+    })();
+  }
 
-    const app = document.querySelector('.app') as HTMLElement;
-    app.innerHTML = winners.createTable();
+  async generateWinners(winners: Winners, api: API, app: App) {
+    const arrOfWinnersWithCars = await api.getWinnersWithCars(app.winnersPage);
+    const tableBody = document.querySelector('.table__body') as HTMLElement;
+    tableBody.innerHTML = '';
+    setTimeout(() => arrOfWinnersWithCars.forEach((elem, i) => tableBody?.append(winners.createTr(elem, i, app))), 100);
+  }
 
-    const tableBody = document.querySelector('.table__body');
-    setTimeout(() => arrOfWinnersWithCars.forEach((elem, i) => tableBody?.append(winners.createTr(elem, i))), 100);
+  generateWinnersListeners(winners: Winners, api: API, app: App, carTrack: CarTrack) {
+    const pagination = document.querySelector('.pagination');
+    pagination?.addEventListener('click', (event) => {
+      const btnPrev = document.querySelector('.pagination__prev') as HTMLButtonElement;
+      const btnNext = document.querySelector('.pagination__next') as HTMLButtonElement;
+      const target = event.target as HTMLElement;
+
+      if (target.className === 'pagination__prev' && !btnPrev.disabled) app.winnersPage -= 1;
+      if (target.className === 'pagination__next' && !btnNext.disabled) app.winnersPage += 1;
+
+      this.generateWinners(winners, api, app);
+      winners.isClickablePagination(app, api);
+      carTrack.updatePageNumber(app, app.winnersPage);
+    });
   }
 }

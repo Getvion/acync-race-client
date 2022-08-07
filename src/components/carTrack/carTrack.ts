@@ -64,9 +64,9 @@ export class CarTrack {
     });
   }
 
-  updatePageNumber(app: App) {
+  updatePageNumber(app: App, number = app.garagePage) {
     const page = document.querySelector('.page__number') as HTMLSpanElement;
-    page.innerText = String(app.garagePage);
+    page.innerText = String(number);
   }
 
   paginationClickableButtons(app: App, api: API) {

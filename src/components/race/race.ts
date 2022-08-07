@@ -4,14 +4,13 @@ import { CarTrack } from '../carTrack/carTrack';
 
 export class Race {
   generateButtons() {
-    const block = `
+    return `
         <div class="fields__buttons">
           <button class="fields__button fields__button-start">Race</button>
-          <button class="fields__button fields__button-reset">Reset</button>
+          <button class="fields__button fields__button-reset" disabled>Reset</button>
           <button class="fields__button fields__button-generate">Generate Cars</button>
         </div>
         `;
-    return block;
   }
 
   generateCars(carTrack: CarTrack, count = 100) {
