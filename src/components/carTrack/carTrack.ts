@@ -38,9 +38,9 @@ export class CarTrack {
     page.innerHTML = `Page <span class="page__number">${app.garagePage}</span>`;
     const pagination = document.createElement('div');
     pagination.innerHTML = `
-      <button disabled class="pagination__prev">prev</button>
-      <button class="pagination__next">next</button>
-      `;
+        <button disabled class="pagination__prev">prev</button>
+        <button class="pagination__next">next</button>
+        `;
     pagination.classList.add('pagination');
     main.append(page, h1, trackList, pagination);
   }
@@ -61,6 +61,8 @@ export class CarTrack {
 
       this.paginationClickableButtons(app, api);
       this.updatePageNumber(app);
+      (document.querySelector('.fields__button-reset') as HTMLButtonElement).disabled = true;
+      (document.querySelector('.fields__button-start') as HTMLButtonElement).disabled = false;
     });
   }
 
@@ -69,24 +71,22 @@ export class CarTrack {
     page.innerText = String(number);
   }
 
-  paginationClickableButtons(app: App, api: API) {
+  paginationClickableButtons(app: App, api: API, num = app.garagePage) {
     const btnPrev = document.querySelector('.pagination__prev') as HTMLButtonElement;
     const btnNext = document.querySelector('.pagination__next') as HTMLButtonElement;
 
-    app.garagePage === 1 ? (btnPrev.disabled = true) : (btnPrev.disabled = false);
-
+    num === 1 ? (btnPrev.disabled = true) : (btnPrev.disabled = false);
     (async () => {
       const amount = await api.getAmountCars();
       const pages = Math.ceil(amount / app.tracksOnPage);
 
       pages > app.garagePage ? (btnNext.disabled = false) : (btnNext.disabled = true);
-
-      if (!(pages < app.garagePage)) return;
-
-      app.garagePage -= 1;
-      this.createTrack(api.getCars(app.garagePage));
-      this.updatePageNumber(app);
-      setTimeout(() => this.carHandler(api), 100);
+      if (pages < app.garagePage) {
+        app.garagePage -= 1;
+        this.createTrack(api.getCars(app.garagePage));
+        this.updatePageNumber(app);
+        setTimeout(() => this.carHandler(api), 100);
+      }
     })();
   }
 
@@ -109,12 +109,17 @@ export class CarTrack {
           <button class="button-stop" disabled>B</button>
         </div>
         <div class="car" id="${id}">
+            <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>
           <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>          
+            <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>
+          <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>          
+            <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>
         </div>
         <div class="finish">
-          <svg><use xlink:href="./sprite.svg#finish"></use></svg>         
+          <svg><use xlink:href="./sprite.svg#finish"></use></svg>
         </div>
-      </div>`;
+      </div>
+      `;
   }
 
   createTrack(cars: Promise<ICar[]>) {
@@ -129,12 +134,17 @@ export class CarTrack {
     fetch(`http://127.0.0.1:3000/garage/${id}`, {
       method: 'DELETE',
     });
+    fetch(`http://127.0.0.1:3000/winners/${id}`, {
+      method: 'DELETE',
+    });
   }
 
   createCar(name: string, color: string) {
     fetch(`http://127.0.0.1:3000/garage/`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ name, color }),
     });
   }
@@ -142,7 +152,9 @@ export class CarTrack {
   updateCar(name: string, color: string, id: string) {
     fetch(`http://127.0.0.1:3000/garage/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ name, color }),
     });
   }
@@ -183,9 +195,10 @@ export class CarTrack {
       const { success } = await api.switchEngineState(id, 'drive');
       return { time, success, id };
     } catch (error) {
-      if (!(error instanceof Error)) return;
-      car.style.animationPlayState = 'paused';
-      await api.switchEngineState(id, 'stopped');
+      if (error instanceof Error) {
+        car.style.animationPlayState = 'paused';
+        await api.switchEngineState(id, 'stopped');
+      }
     }
   }
 }

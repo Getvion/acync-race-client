@@ -5,6 +5,8 @@ export class App {
   tracksOnPageAmount: number;
   winnersPageCounter: number;
   winnersOnPageAmount: number;
+  sortValue: 'id' | 'wins' | 'time';
+  sortOrder: 'ASC' | 'DESC';
   selectedCarData: { name: string; color: string; id: string };
   createCarData: { name: string; color: string };
 
@@ -13,6 +15,8 @@ export class App {
     this.tracksOnPageAmount = 7;
     this.winnersPageCounter = 1;
     this.winnersOnPageAmount = 10;
+    this.sortValue = 'id';
+    this.sortOrder = 'ASC';
     this.selectedCarData = { name: '', color: '#000000', id: '' };
     this.createCarData = { name: '', color: '#000000' };
   }
@@ -49,12 +53,21 @@ export class App {
     return this.winnersOnPageAmount;
   }
 
+  toggleOrder() {
+    if (this.sortOrder === 'ASC') {
+      this.sortOrder = 'DESC';
+    } else {
+      this.sortOrder = 'ASC';
+    }
+  }
+
   get selectedCar() {
     return this.selectedCarData;
   }
 
-  set selectedCar(dataObj: { name: string; color: string; id: string }) {
+  set selectedCar(dataObj: { id: string; name: string; color: string }) {
     this.selectedCarData = dataObj;
+    console.log('changed', this.selectedCarData);
   }
 
   get createdCar() {

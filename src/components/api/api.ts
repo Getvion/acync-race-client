@@ -54,6 +54,11 @@ export class API {
     return (await Promise.resolve(response.json())).length;
   }
 
+  async getAllWinners() {
+    const response = await fetch(`${this.BASE_URL}/winners`);
+    return await response.json();
+  }
+
   async getWinners(page: number = 1, limit: number = 10, sort: string = 'id', order: string = 'ASC') {
     const data = await fetch(`${this.BASE_URL}/winners?_page=${page}&_limit=${limit}&_sort=${sort}&_order=${order}`);
     return data.json();

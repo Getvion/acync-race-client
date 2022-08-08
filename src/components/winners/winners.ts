@@ -1,6 +1,7 @@
 import { IWinnerWithCars } from '../../types';
 import { API } from '../api/api';
 import { App } from '../app/app';
+import { Generate } from '../generate/generate';
 
 import './winners.scss';
 
@@ -30,7 +31,7 @@ export class Winners {
   createRow(obj: IWinnerWithCars, index: number, app: App) {
     const { color, name, wins, time } = obj;
     return `
-      <td class="table__ceil">${10 * (app.winnersPage - 1) + index + 1}</td>
+      <td class="table__ceil">${app.winnersOnPage * (app.winnersPage - 1) + index + 1}</td>
       <td class="table__ceil">
         <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>
       </td>
@@ -56,5 +57,37 @@ export class Winners {
       const pages = Math.ceil(amount / app.winnersOnPage);
       pages > app.winnersPage ? (btnNext.disabled = false) : (btnNext.disabled = true);
     })();
+  }
+
+  sortListener(app: App, generate: Generate, api: API, winners: Winners) {
+    const header = document.querySelector('thead tr');
+    header?.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      if (target.innerText === 'wins') {
+        if (app.sortValue === 'wins') {
+          app.toggleOrder();
+        } else {
+          app.sortOrder = 'ASC';
+        }
+        app.sortValue = 'wins';
+      }
+      if (target.innerText === 'best time') {
+        if (app.sortValue === 'time') {
+          app.toggleOrder();
+        } else {
+          app.sortOrder = 'ASC';
+        }
+        app.sortValue = 'time';
+      }
+      if (target.innerText === 'number') {
+        if (app.sortValue === 'id') {
+          app.toggleOrder();
+        } else {
+          app.sortOrder = 'ASC';
+        }
+        app.sortValue = 'id';
+      }
+      generate.generateWinners(winners, api, app, app.sortValue, app.sortOrder);
+    });
   }
 }

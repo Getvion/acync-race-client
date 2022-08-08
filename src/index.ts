@@ -29,18 +29,12 @@ garageBtn?.addEventListener('click', () => {
   carTrack.createTrack(api.getCars(app.garagePage));
   garageBtn.disabled = true;
   winnerBtn.disabled = false;
-
-  const updateName = document.querySelector('.update__input[type=text]') as HTMLInputElement;
-  const updateColor = document.querySelector('.update__input[type=color]') as HTMLInputElement;
-  updateName.value = app.selectedCar.name;
-  updateColor.value = app.selectedCar.color;
-
-  const createName = document.querySelector('.create__input[type=text]') as HTMLInputElement;
-  const createColor = document.querySelector('.create__input[type=color]') as HTMLInputElement;
-  createName.value = app.createdCar.name;
-  createColor.value = app.createdCar.color;
+  setTimeout(() => {
+    generate.inputListeners(app);
+    generate.inputsFiller(app, api, carTrack);
+  }, 200);
 });
-garageBtn.click();
+setTimeout(() => garageBtn.click(), 500);
 
 winnerBtn.addEventListener('click', () => {
   garageBtn.disabled = false;
@@ -48,9 +42,10 @@ winnerBtn.addEventListener('click', () => {
   const appElement = document.querySelector('.app') as HTMLElement;
   appElement.innerHTML = '';
   generate.generatePageWinners(api, app);
-  generate.generateWinners(winners, api, app);
+  generate.generateWinners(winners, api, app, app.sortValue, app.sortOrder);
   const appContainer = document.querySelector('.app') as HTMLElement;
   appContainer.innerHTML = winners.createTable();
   winners.isClickablePagination(app, api);
   generate.generateWinnersListeners(winners, api, app, carTrack);
+  winners.sortListener(app, generate, api, winners);
 });
