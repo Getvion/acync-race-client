@@ -110,10 +110,6 @@ export class CarTrack {
         </div>
         <div class="car" id="${id}">
             <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>
-          <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>          
-            <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>
-          <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>          
-            <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>
         </div>
         <div class="finish">
           <svg><use xlink:href="./sprite.svg#finish"></use></svg>
