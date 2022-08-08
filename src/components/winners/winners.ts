@@ -31,7 +31,9 @@ export class Winners {
     const { color, name, wins, time } = obj;
     return `
       <td class="table__ceil">${10 * (app.winnersPage - 1) + index + 1}</td>
-      <td class="table__ceil">${color}</td>
+      <td class="table__ceil">
+        <svg><use xlink:href="./sprite.svg#car" fill="${color}"></use></svg>
+      </td>
       <td class="table__ceil">${name}</td>
       <td class="table__ceil">${wins}</td>
       <td class="table__ceil">${time}</td>
