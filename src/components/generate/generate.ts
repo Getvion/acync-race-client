@@ -18,6 +18,7 @@ export class Generate {
     const createInput = document.querySelector('.field__create.create');
     createInput?.addEventListener('click', (event) => {
       this.createInputListener(event, carTrack, api, app, createInput);
+      app.createdCar = { name: '', color: '' };
     });
 
     const createInputName = document.querySelector('.create__input[type=text]') as HTMLInputElement;
