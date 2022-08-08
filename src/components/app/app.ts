@@ -5,7 +5,7 @@ export class App {
   tracksOnPageAmount: number;
   winnersPageCounter: number;
   winnersOnPageAmount: number;
-  selectedCarData: { name: string; color: string };
+  selectedCarData: { name: string; color: string; id: string };
   createCarData: { name: string; color: string };
 
   constructor() {
@@ -13,7 +13,7 @@ export class App {
     this.tracksOnPageAmount = 7;
     this.winnersPageCounter = 1;
     this.winnersOnPageAmount = 10;
-    this.selectedCarData = { name: '', color: '#000000' };
+    this.selectedCarData = { name: '', color: '#000000', id: '' };
     this.createCarData = { name: '', color: '#000000' };
   }
 
@@ -53,7 +53,7 @@ export class App {
     return this.selectedCarData;
   }
 
-  set selectedCar(dataObj: { name: string; color: string }) {
+  set selectedCar(dataObj: { name: string; color: string; id: string }) {
     this.selectedCarData = dataObj;
   }
 

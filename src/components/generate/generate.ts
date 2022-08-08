@@ -72,7 +72,7 @@ export class Generate {
   }
 
   selectButton(target: HTMLElement, api: API, carTrack: CarTrack, app: App) {
-    const carId = target.parentElement?.nextElementSibling?.id;
+    const carId = target.parentElement?.nextElementSibling?.id as string;
     const updateInput = document.querySelector('.field__update.update');
     const updateButton = updateInput?.querySelector('button');
     const name = updateInput?.querySelector('.update__input[type=text]') as HTMLInputElement;
@@ -85,7 +85,7 @@ export class Generate {
       name.value = result.name;
       color.value = result.color;
 
-      app.selectedCar = { name: result.name, color: result.color };
+      app.selectedCar = { name: result.name, color: result.color, id: carId };
     });
 
     updateButton?.addEventListener('click', () => {
@@ -95,6 +95,7 @@ export class Generate {
       updateInput?.childNodes.forEach((elem) => ((elem as HTMLInputElement).disabled = true));
       name.value = '';
       color.value = '#000000';
+      app.selectedCar = { name: '', color: '#000000', id: '' };
 
       carTrack.createTrack(api.getCars(app.garagePage));
       setTimeout(() => carTrack.carHandler(api), 100);

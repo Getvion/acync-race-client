@@ -35,10 +35,33 @@ export class Race {
       'Porsche',
       'Haval',
     ];
+    const carModels = [
+      'Camry',
+      'Supra',
+      'A8',
+      'A4',
+      'S5',
+      'M2',
+      'M4',
+      'Bronco',
+      'Focus',
+      'Probe',
+      'Kuga',
+      'Pilot',
+      'Accord',
+      'Solaris',
+      'Elantra',
+      'Sonata',
+      'Cerato',
+      'Rio',
+    ];
     for (let i = 0; i < count; i += 1) {
-      const car = Math.floor(Math.random() * carNames.length);
+      const carName = Math.floor(Math.random() * carNames.length);
+      const carModel = Math.floor(Math.random() * carModels.length);
+
+      const car = `${carNames[carName]} ${carModels[carModel]}`;
       const color = Math.floor(Math.random() * 16777215).toString(16);
-      carTrack.createCar(carNames[car], `#${color}`);
+      carTrack.createCar(car, `#${color}`);
     }
   }
 
