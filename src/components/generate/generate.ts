@@ -20,6 +20,23 @@ export class Generate {
       this.createInputListener(event, carTrack, api, app, createInput);
     });
 
+    const createInputName = document.querySelector('.create__input[type=text]') as HTMLInputElement;
+    const createInputColor = document.querySelector('.create__input[type=color]') as HTMLInputElement;
+    let nameValue = '';
+    let colorValue = '';
+
+    createInputName.addEventListener('input', (event) => {
+      const value = (event.target as HTMLInputElement).value;
+      nameValue = value;
+      app.createdCar = { name: nameValue, color: colorValue };
+    });
+
+    createInputColor.addEventListener('input', (event) => {
+      const value = (event.target as HTMLInputElement).value;
+      colorValue = value;
+      app.createdCar = { name: nameValue, color: colorValue };
+    });
+
     const startRaceBtn = document.querySelector('.fields__button-start') as HTMLButtonElement;
     const stopRaceBtn = document.querySelector('.fields__button-reset') as HTMLButtonElement;
 
@@ -66,6 +83,8 @@ export class Generate {
     currentCar.then((result) => {
       name.value = result.name;
       color.value = result.color;
+
+      app.selectedCar = { name: result.name, color: result.color };
     });
 
     updateButton?.addEventListener('click', () => {
@@ -84,17 +103,19 @@ export class Generate {
   createInputListener(event: Event, carTrack: CarTrack, api: API, app: App, createInput: Element) {
     const target = event?.target as HTMLElement;
     if (target.tagName === 'BUTTON') {
-      const name = (createInput.querySelector('.create__input[type=text]') as HTMLInputElement).value;
-      const color = (createInput.querySelector('.create__input[type=color]') as HTMLInputElement).value;
-      if (name && color) {
-        carTrack.createCar(name, color);
-        carTrack.createTrack(api.getCars(app.garagePage));
-        setTimeout(() => carTrack.carHandler(api), 100);
-        carTrack.updateGarageAmount(api);
-        carTrack.paginationClickableButtons(app, api);
-      }
-      (createInput.querySelector('.create__input[type=text]') as HTMLInputElement).value = '';
-      (createInput.querySelector('.create__input[type=color]') as HTMLInputElement).value = '#000000';
+      const name = createInput.querySelector('.create__input[type=text]') as HTMLInputElement;
+      const color = createInput.querySelector('.create__input[type=color]') as HTMLInputElement;
+
+      if (!(name.value && color.value)) return;
+
+      carTrack.createCar(name.value, color.value);
+      carTrack.createTrack(api.getCars(app.garagePage));
+      setTimeout(() => carTrack.carHandler(api), 100);
+      carTrack.updateGarageAmount(api);
+      carTrack.paginationClickableButtons(app, api);
+
+      name.value = '';
+      color.value = '#000000';
     }
   }
 

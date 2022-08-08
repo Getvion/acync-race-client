@@ -29,6 +29,16 @@ garageBtn?.addEventListener('click', () => {
   carTrack.createTrack(api.getCars(app.garagePage));
   garageBtn.disabled = true;
   winnerBtn.disabled = false;
+
+  const updateName = document.querySelector('.update__input[type=text]') as HTMLInputElement;
+  const updateColor = document.querySelector('.update__input[type=color]') as HTMLInputElement;
+  updateName.value = app.selectedCar.name;
+  updateColor.value = app.selectedCar.color;
+
+  const createName = document.querySelector('.create__input[type=text]') as HTMLInputElement;
+  const createColor = document.querySelector('.create__input[type=color]') as HTMLInputElement;
+  createName.value = app.createdCar.name;
+  createColor.value = app.createdCar.color;
 });
 garageBtn.click();
 

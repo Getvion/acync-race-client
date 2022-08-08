@@ -5,12 +5,16 @@ export class App {
   tracksOnPageAmount: number;
   winnersPageCounter: number;
   winnersOnPageAmount: number;
+  selectedCarData: { name: string; color: string };
+  createCarData: { name: string; color: string };
 
   constructor() {
     this.garagePageCounter = 1;
     this.tracksOnPageAmount = 7;
     this.winnersPageCounter = 1;
     this.winnersOnPageAmount = 10;
+    this.selectedCarData = { name: '', color: '#000000' };
+    this.createCarData = { name: '', color: '#000000' };
   }
 
   get garagePage() {
@@ -43,5 +47,21 @@ export class App {
 
   get winnersOnPage() {
     return this.winnersOnPageAmount;
+  }
+
+  get selectedCar() {
+    return this.selectedCarData;
+  }
+
+  set selectedCar(dataObj: { name: string; color: string }) {
+    this.selectedCarData = dataObj;
+  }
+
+  get createdCar() {
+    return this.createCarData;
+  }
+
+  set createdCar(dataObj: { name: string; color: string }) {
+    this.createCarData = dataObj;
   }
 }
