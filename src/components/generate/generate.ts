@@ -144,7 +144,7 @@ export class Generate {
           const winnerName = (await api.getCar(winner.id)).name;
 
           alert(`Win ${winnerName} with time ${winner.time}`);
-          if (winnersList.find((elem: any) => Number(elem.id) === Number(winner.id))) {
+          if (winnersList.find((elem: { id: number; name: string; time: string }) => elem.id === Number(winner.id))) {
             const winnerObj = await api.getWinner(winner.id);
             const bestTime = winner.time < winnerObj.time ? winner.time : winnerObj.time;
 
